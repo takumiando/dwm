@@ -205,6 +205,7 @@ static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setgaps(const Arg *arg);
 static void setlayout(const Arg *arg);
+static void unfloatvisible(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
@@ -1557,6 +1558,21 @@ setlayout(const Arg *arg)
 		arrange(selmon);
 	else
 		drawbar(selmon);
+}
+
+void
+unfloatvisible(const Arg *arg)
+{
+    Client *c;
+
+    for (c = selmon->clients; c; c = c->next)
+        if (ISVISIBLE(c) && c->isfloating)
+            c->isfloating = c->isfixed;
+
+    if (arg && arg->v)
+        setlayout(arg);
+    else
+        arrange(selmon);
 }
 
 /* arg > 1.0 will set mfact absolutely */

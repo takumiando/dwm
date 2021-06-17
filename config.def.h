@@ -1,13 +1,14 @@
 /* See LICENSE file for copyright and license details. */
+#include <X11/XF86keysym.h>
 
 /* appearance */
-static const unsigned int borderpx  = 1;        /* border pixel of windows */
-static const unsigned int gappx     = 5;        /* gaps between windows */
-static const unsigned int snap      = 32;       /* snap pixel */
+static const unsigned int borderpx  = 4;        /* border pixel of windows */
+static const unsigned int gappx     = 20;        /* gaps between windows */
+static const unsigned int snap      = 20;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const char *fonts[]          = { "monospace:size=10" };
-static const char dmenufont[]       = "monospace:size=10";
+static const char *fonts[]          = { "Terminus:size=10" };
+static const char dmenufont[]       = "Terminus:size=10";
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
@@ -20,7 +21,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+static const char *tags[] = { "TERM", "DEV", "WEB", "FILE", "VID", "AUD", "IRC", "ETC" };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -33,7 +34,7 @@ static const Rule rules[] = {
 };
 
 /* layout(s) */
-static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
+static const float mfact     = 0.5; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
 static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
 
@@ -59,10 +60,20 @@ static const Layout layouts[] = {
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 static const char *termcmd[]  = { "st", NULL };
+static const char *volup[] = { "/home/takumi/bin/vol", "up", NULL };
+static const char *voldown[] = { "/home/takumi/bin/vol", "down", NULL };
+static const char *volmute[] = { "/home/takumi/bin/vol", "mute", NULL };
+static const char *mic[] = { "/home/takumi/bin/mic", "mute", NULL };
+static const char *briup[] = { "/home/takumi/bin/bri", "up", NULL };
+static const char *bridown[] = { "/home/takumi/bin/bri", "down", NULL };
+static const char *scr[] = { "/home/takumi/bin/scr", NULL };
+static const char *scr_sel[] = { "/home/takumi/bin/scr", "s", NULL };
+static const char *file[] = { "pcmanfm", NULL };
+static const char *lock[] = { "xscreensaver-command", "--lock", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
-	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
+	{ MODKEY,                       XK_space,  spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
@@ -73,21 +84,32 @@ static Key keys[] = {
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
 	{ MODKEY,                       XK_Return, zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
-	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
+	{ MODKEY|ShiftMask,             XK_q,      killclient,     {0} },
+	{ MODKEY,                       XK_t,      unfloatvisible, {.v = &layouts[0]} },
 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                       XK_space,  setlayout,      {0} },
-	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
+	{ MODKEY|ShiftMask,             XK_space,  unfloatvisible, {0} },
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
 	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-	{ MODKEY,                       XK_minus,  setgaps,        {.i = -1 } },
-	{ MODKEY,                       XK_equal,  setgaps,        {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_equal,  setgaps,        {.i = 0  } },
+	{ 0, XF86XK_AudioRaiseVolume,              spawn,          {.v = volup } },
+	{ 0, XF86XK_AudioLowerVolume,              spawn,          {.v = voldown } },
+	{ 0, XF86XK_AudioMute,                     spawn,          {.v = volmute } },
+	{ 0, XF86XK_AudioMicMute,                  spawn,          {.v = mic } },
+	{ MODKEY,                       XK_v,      spawn,          {.v = volup } },
+	{ MODKEY|ShiftMask,             XK_v,      spawn,          {.v = voldown } },
+	{ MODKEY|ShiftMask,             XK_m,      spawn,          {.v = volmute } },
+	{ 0, XF86XK_MonBrightnessUp,               spawn,          {.v = briup } },
+	{ 0, XF86XK_MonBrightnessDown,             spawn,          {.v = bridown } },
+	{ 0,                            XK_Print,  spawn,          {.v = scr } },
+	{ 0|ShiftMask,                  XK_Print,  spawn,          {.v = scr_sel } },
+	{ MODKEY,                       XK_p,      spawn,          {.v = scr } },
+	{ MODKEY|ShiftMask,             XK_p,      spawn,          {.v = scr_sel } },
+	{ MODKEY,                       XK_Escape, spawn,          {.v = lock } },
+	{ MODKEY|ShiftMask,             XK_f,      spawn,          {.v = file } },
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
@@ -97,7 +119,7 @@ static Key keys[] = {
 	TAGKEYS(                        XK_7,                      6)
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
-	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
+	{ MODKEY|ShiftMask,             XK_e,      quit,           {0} },
 };
 
 /* button definitions */
